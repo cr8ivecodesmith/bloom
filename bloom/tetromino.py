@@ -43,6 +43,8 @@ class Tetromino(object):
     - Manage rotation
     - Check collisions with game boarders
     - Check collisions with landed blocks
+    - Check landing status
+    - Check next shape for status HUD
 
     """
     def __init__(self, buffer, board):
@@ -162,7 +164,7 @@ class Shape(object):
 
     - Keep track of blocks position relative to the board
     - Manage drawing on board
-    - Manage drawing on stat hud
+    - Peek at next shape for rotation checks
 
     """
     __slots__ = (
