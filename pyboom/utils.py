@@ -4,7 +4,14 @@ __all__ = [
     'enumerate',
 ]
 from __future__ import generators
+
 import time
+from os import path
+
+
+DRIVE_C = 'c:\\'
+DRIVE_E = 'e:\\'
+SYSTEM_APPS = 'system\\apps\\'
 
 
 def any(seq):
@@ -40,11 +47,35 @@ def enumerate(seq, reverse=0):
         yield i, seq[i]
 
 
-def debug(msg):
+def get_project_path(project_name):
+    """Get path where the project is installed
+
+    """
+    loc = '%s%s%s' % (DRIVE_E, SYSTEM_APPS, project_name)
+    if path.exists(loc):
+        return loc
+
+    loc = '%s%s%s' % (DRIVE_C, SYSTEM_APPS, project_name)
+    if path.exists(loc):
+        return loc
+
+    return
+
+
+def debug(msg, level=None, log_file=None):
     """Prints a debug message
 
     """
-    tpl = u"[%s] DEBUG - %s\n" % (
-        time.strftime("%Y-%m-%d %H:%M:%S"), str(msg)
+    if isinstance(level, str):
+        level = level.upper()
+    else:
+        level = 'DEBUG'
+    tpl = u"[%s] %s - %s\n" % (
+        time.strftime("%Y-%m-%d %H:%M:%S"), level, str(msg)
     )
-    print tpl
+    if log_file and path.exists(log_file):
+        fh = open(log_file, 'a')
+        print >> fh, tpl
+        fh.close()
+    else:
+        print tpl

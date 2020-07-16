@@ -2,12 +2,24 @@
 Game settings
 
 """
+from os import path
+
 from pyboom.colors import BLACK
 from pyboom.colors import CYAN, BLUE, ORANGE, YELLOW, GREEN, MAGENTA, RED
+
+from pyboom.utils import get_project_path
+
 
 FPS_LIMIT = (1.0 / 60.0)  # 60fps
 BG_COLOR = BLACK
 GAME_TITLE = u"Bloom"
+
+PROJECT_PATH = get_project_path(GAME_TITLE)
+LOG_FILE = path.join(PROJECT_PATH, '%s.log' % (GAME_TITLE.lower()))
+if not path.exists(LOG_FILE):
+    fh = open(LOG_FILE, 'w')
+    fh.write('')
+    fh.close()
 
 BLOCK_SIZE = 10
 
