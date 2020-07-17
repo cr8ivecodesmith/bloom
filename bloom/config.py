@@ -21,6 +21,8 @@ if not path.exists(LOG_FILE):
     fh.write('')
     fh.close()
 
+SFX_PATH = path.join(PROJECT_PATH, 'sfx')
+
 BLOCK_SIZE = 10
 
 BLOCKS_X = 10

@@ -12,3 +12,10 @@ Rules, scoring, level progression adapted from the Gameboy version.
 2. Install `PythonForS60_1stEd_1_3_1.sis` to your memory card.
 3. Install `Bloom.sis` to your memory card.
 4. Run the `Bloom` app.
+
+
+## SFX Credits
+
+[ProjectsU012](https://freesound.org/people/ProjectsU012/)
+[sharesynth](https://freesound.org/people/sharesynth/)
+[SomeGuy22](https://freesound.org/people/SomeGuy22/)
