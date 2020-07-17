@@ -5,12 +5,16 @@ from e32 import ao_sleep
 from key_codes import EKeyLeftArrow, EKeyRightArrow, EKeyUpArrow, EKeyDownArrow
 from key_codes import EKey5, EKey7
 
+from pyboom.utils import debug
+
 from bloom.ui import GameHud, mask_rows
 from bloom.board import Board
 from bloom.tetromino import Tetromino
 from bloom.config import FLASH_PRE_DELAY, FLASH_POST_DELAY
 from bloom.config import FPS_LIMIT, LEVEL_SPEED, MAX_LEVEL
 from bloom.config import SCORE_TABLE, MAX_SCORE
+from bloom.config import LOG_FILE
+from bloom.sfx import Sfx
 
 
 class Game(object):
@@ -30,7 +34,7 @@ class Game(object):
         self.is_key_held = world.is_key_held
 
         # Set to true if you want to handle game timers yourself
-        self.handle_timers = True
+        self.handle_timers = 1
 
         # Initialize the game board
         self.board = Board(self.buffer)
@@ -59,6 +63,22 @@ class Game(object):
         # Initialize HUD
         game_hud = GameHud(self)
         self.draw_game_hud = game_hud.draw
+
+        # Sound effects
+        try:
+            self.sfx = Sfx()
+        except Exception, e:
+            debug(
+                '[Game] - Sfx - %s' % (str(e)),
+                level='ERROR', log_file=LOG_FILE
+            )
+            raise
+
+        # Flags for sfx assoc
+        self.sfx_move = 0
+        self.sfx_rotate = 0
+        self.sfx_land = 0
+        self.sfx_clear_rows = 0
 
         self.redraw()
 
@@ -101,6 +121,8 @@ class Game(object):
             mask_rows(self.buffer, self.win_rows)
 
     def run(self):
+        self.redraw()
+
         # Move this out on it's own function
         if self.tetromino.is_landed():
             self.flush_shape(self.tetromino.shape)
@@ -109,6 +131,7 @@ class Game(object):
             self.win_rows = list(self.get_win_rows())
             if self.win_rows:
                 win_rows_count = len(self.win_rows)
+                self.sfx_clear_rows = 1
 
                 # On
                 self.redraw(win_anim_fn=self.flash_win_rows)
@@ -125,6 +148,7 @@ class Game(object):
                 ao_sleep(FLASH_POST_DELAY)
 
             self.soft_drops = 0
+            self.sfx_land = 1
             self.redraw()
 
             if self.is_filled():
@@ -160,56 +184,57 @@ class Game(object):
     def handle_event(self, event):
         is_key_clicked = self.is_key_clicked
         is_key_held = self.is_key_held
-        has_moved = False
 
         # Movement
-        if is_key_clicked(EKeyLeftArrow):
+        if is_key_clicked(EKeyLeftArrow) or is_key_held(EKeyLeftArrow):
             self.tetromino_move(0, -1)
-            has_moved = True
-        elif is_key_clicked(EKeyRightArrow):
+            self.sfx_move = 1
+        elif is_key_clicked(EKeyRightArrow) or is_key_held(EKeyRightArrow):
             self.tetromino_move(0, 1)
-            has_moved = True
-        elif is_key_held(EKeyLeftArrow):
-            self.tetromino_move(0, -1)
-            self.redraw()
-        elif is_key_held(EKeyRightArrow):
-            self.tetromino_move(0, 1)
-            self.redraw()
+            self.sfx_move = 1
 
-        # Soft and hard drops
-        elif is_key_clicked(EKeyDownArrow):
+        # Soft drops
+        elif is_key_clicked(EKeyDownArrow) or is_key_held(EKeyDownArrow):
             self.tetromino_move(1, 0)
             self.soft_drops += 1
-            has_moved = True
-        elif is_key_held(EKeyDownArrow):
-            self.tetromino_move(1, 0)
-            self.soft_drops += 1
-            self.redraw()
-            self.tetromino_move(1, 0)
-            self.soft_drops += 1
-            self.redraw()
+            self.sfx_move = 1
 
         # Rotation
         elif is_key_clicked(EKeyUpArrow) or is_key_clicked(EKey5):
             self.tetromino_rotate(1)
-            has_moved = True
+            self.sfx_rotate = 1
         elif is_key_clicked(EKey7):
+            self.sfx_rotate = 1
             self.tetromino_rotate(-1)
-            has_moved = True
 
-        if has_moved:
-            self.redraw()
-            has_moved = False
+        self.redraw(is_event=1)
 
-    def redraw(self, win_anim_fn=None):
+    def redraw(self, win_anim_fn=None, is_event=None):
         self.buffer_clear(self.bg_color)
 
         self.draw_game_hud()
         self.board_draw()
         self.tetromino_draw()
 
+        # Determine which sfx to play
+        if not is_event:
+            if self.sfx_move:
+                self.sfx.move()
+                self.sfx_move = 0
+            elif self.sfx_rotate:
+                self.sfx.rotate()
+                self.sfx_rotate = 0
+
+            if self.sfx_land:
+                self.sfx.land()
+                self.sfx_land = 0
+            if self.sfx_clear_rows:
+                self.sfx.clear_rows()
+                self.sfx_clear_rows = 0
+
         # Flash win row animation
         if win_anim_fn:
             win_anim_fn()
+
         # self.world.show_ram_usage()
         self.canvas_blit(self.buffer)
