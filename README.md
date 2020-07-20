@@ -1,9 +1,12 @@
+![Cover](cover-gh.jpg?raw=true "Cover")
+
 Bloom
 =====
 
 A tetris-clone using PyS60 for Nokia S60v1 phones (i.e. N-Gage)
 
 Rules, scoring, level progression adapted from the Gameboy version.
+
 
 
 ## Screenshots
@@ -26,3 +29,8 @@ Rules, scoring, level progression adapted from the Gameboy version.
 - [ProjectsU012](https://freesound.org/people/ProjectsU012/)
 - [sharesynth](https://freesound.org/people/sharesynth/)
 - [SomeGuy22](https://freesound.org/people/SomeGuy22/)
+
+
+## Cover Image Credits
+
+- [M0kum0kuren](https://www.reddit.com/user/M0kum0kuren/)
